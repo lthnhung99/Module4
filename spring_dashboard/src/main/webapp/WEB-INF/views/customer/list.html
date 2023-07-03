@@ -28,6 +28,10 @@
                         <div class="card">
                             <div class="card-body">
                                 <h4 class="card-title">Hoverable Table</h4>
+                                <div th:if="${success}">
+                                    <h2 style="color: green;" th:text="${message}"></h2>
+                                </div>
+
                                 <form action="/customers/search" class="card-description">
                                     <div class="row col-lg-6">
                                         <input type="text" name="keySearch" class="form-control">
@@ -59,6 +63,7 @@
                                                     <a th:href="@{/customers/info/__${item.id}__}">View</a>
                                                     <a th:href="@{/customers/__${item.id}__}">Edit</a>
                                                     <a th:href="@{/customers/delete/__${item.id}__}" onclick="return confirm('Bạn chắn chắn muốn xoá không?')">Delete</a>
+
                                                 </td>
                                             </tr>
 

@@ -31,6 +31,12 @@
                                     <div class="card-body">
                                         <p class="card-description">
                                         </p>
+                                        <div th:if="${success}">
+                                            <h2 style="color: green;" th:text="${message}"></h2>
+                                        </div>
+                                        <div th:if="${successEdit}">
+                                            <h2 style="color: green;" th:text="${messageEdit}"></h2>
+                                        </div>
                                         <form class="forms-sample" th:object="${customer}" method="post">
                                             <div class="form-group">
                                                 <label for="fullName">Full name</label>

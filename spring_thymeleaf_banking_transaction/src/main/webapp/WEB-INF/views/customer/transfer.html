@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>Title</title>
+    <title>Transfer</title>
   <link rel="stylesheet" href="/assets/bootstrap/v5.0/css/bootstrap.min.css">
   <link rel="stylesheet" href="/assets/css/style.css">
   <link rel="stylesheet" href="/assets/fontawesome/v5.15.4/css/all.min.css">
@@ -28,35 +28,44 @@
     <div class="row mb-3">
       <div class="col-lg-3">
         <label class="fw-bold">Sender ID</label>
-        <input type="number"  class="form-control" readonly>
+        <input type="number"  class="form-control" th:field="*{sender.id}" readonly>
       </div>
       <div class="col-lg-3">
         <label class="fw-bold">Sender Name</label>
-        <input type="text" class="form-control" readonly>
+        <input type="text" class="form-control" th:field="*{sender.fullName}" readonly>
       </div>
       <div class="col-lg-3">
         <label class="fw-bold">Email </label>
-        <input type="email" class="form-control" required>
+        <input type="email" class="form-control" th:field="*{sender.email}" required>
       </div>
       <div class="col-lg-3">
         <label class="fw-bold">Sender balance ($)</label>
-        <input type="tel"  class="form-control" readonly>
+        <input type="tel"  class="form-control" th:field="*{sender.balance}" readonly>
       </div>
     </div>
     <div class="row mb-3">
       <div class="col-lg-3">
         <label class="fw-bold">Recipient Name</label>
 
+        <select class="form-select" name="recipient.id">
+          <th:block th:each="item : ${recipients}">
+            <option
+                    th:if="${item.id != transfer.sender.id}" th:value="${item.id}" class="form-control">
+              (<span th:text="${item.id}"></span>)
+              <span th:text="${item.fullName}"></span>
+            </option>
+          </th:block>
+        </select>
 
 
       </div>
       <div class="col-lg-3">
         <label class="fw-bold">Transfer amount</label>
-        <input type="number" name="transferAmount" class="form-control" required>
+        <input type="number" name="transferAmount" class="form-control" th:field="*{transferAmount}" required>
       </div>
       <div class="col-lg-3">
         <label class="fw-bold">Fees (%)</label>
-        <input type="tel" name="fees" id="fees" class="form-control" readonly>
+        <input type="tel" name="fees" id="fees" class="form-control" th:field="*{fees}" readonly>
       </div>
       <div class="col-lg-3">
         <label class="fw-bold">Total amount of transaction ($)</label>

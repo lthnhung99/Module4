@@ -211,4 +211,97 @@ public class CustomerController {
         return "/customer/withdraw";
     }
 
+    @GetMapping("/transfer/{senderId}")
+    public String showTransferForm(@PathVariable Long senderId, Model model){
+
+        Optional<Customer> senderOptional = customerService.findById(senderId);
+
+        if (senderOptional.isEmpty()){
+            model.addAttribute("error", true);
+            model.addAttribute("message", "ID không tồn tại");
+            return "/customer/transfer";
+        } else {
+            Customer sender = senderOptional.get();
+
+            Transfer transfer = new Transfer();
+            transfer.setSender(sender);
+            model.addAttribute("transfer", transfer);
+
+            List<Customer> recipients = customerService.findAll();
+            model.addAttribute("recipients", recipients);
+        }
+
+
+        return "/customer/transfer";
+    }
+
+    @PostMapping("/transfer/{senderId}")
+    public String doTransfer(@PathVariable Long senderId, Model model ,@ModelAttribute Transfer transfer){
+
+        Optional<Customer> senderOptional = customerService.findById(senderId);
+        List<Customer> recipients = customerService.findAll();
+        model.addAttribute("recipients", recipients);
+        model.addAttribute("transfer", transfer);
+
+        if (senderOptional.isEmpty()){
+            model.addAttribute("error", true);
+            model.addAttribute("message", "Không tìm thấy sender");
+            return "/customer/transfer";
+        }
+
+        Optional<Customer> recipientOptional = customerService.findById(transfer.getRecipient().getId());
+
+        if (recipientOptional.isEmpty()) {
+            model.addAttribute("error", true);
+            model.addAttribute("message", "Không tìm thấy recipient");
+            return "/customer/transfer";
+        }
+
+        Customer sender = senderOptional.get();
+        Customer recipient = recipientOptional.get();
+
+        if (sender.getId() == recipient.getId()) {
+            model.addAttribute("error", true);
+            model.addAttribute("message", "Recipient phải khác Sender");
+            return "/customer/transfer";
+        }
+
+        BigDecimal currentBalance = sender.getBalance();
+        BigDecimal transferAmount = transfer.getTransferAmount();
+        Long fees = transfer.getFees();
+        BigDecimal feesAmount = transferAmount.multiply(BigDecimal.valueOf(fees)).divide(BigDecimal.valueOf(100));
+        BigDecimal transactionAmount = transferAmount.add(feesAmount) ;
+
+        if (currentBalance.compareTo(transactionAmount) < 0) {
+            //model.addAttribute("currentRecipient", recipientId);
+            model.addAttribute("error", true);
+            model.addAttribute("message", "Số dư không đủ");
+            return "/customer/transfer";
+
+        }
+        BigDecimal newBalance = currentBalance.subtract(transactionAmount);
+        sender.setBalance(newBalance);
+        customerService.save(sender);
+
+        BigDecimal recipientCurrentBalance = recipient.getBalance();
+        BigDecimal recipientNewBalance = recipientCurrentBalance.add(transfer.getTransferAmount());
+        recipient.setBalance(recipientNewBalance);
+        customerService.save(recipient);
+
+        transfer.setId(null);
+        transfer.setSender(sender);
+        transfer.setRecipient(recipient);
+        transfer.setTransferAmount(transferAmount);
+        transfer.setFeesAmount(feesAmount);
+        transfer.setTransactionAmount(transactionAmount);
+        transferService.save(transfer);
+        model.addAttribute("transfer", transfer);
+
+        //model.addAttribute("currentRecipient", recipientId);
+        model.addAttribute("success", true);
+        model.addAttribute("message", "Chuyển thành công");
+
+        return "/customer/transfer";
+    }
+
 }

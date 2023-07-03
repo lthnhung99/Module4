@@ -1,8 +1,17 @@
 package com.cg.model;
 
+import javax.persistence.*;
+
+@Entity
+@Table(name = "customers")
+
 public class Customer {
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
+    @Column(name = "full_name", nullable = false)
     private String fullName;
+    @Column(nullable = false, unique = true)
     private String email;
     private String phone;
     private String address;
