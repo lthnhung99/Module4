@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>List of customer</title>
+    <link rel="stylesheet" href="/assets/bootstrap/v5.0/css/bootstrap.min.css">
+    <link rel="stylesheet" href="/assets/css/style.css">
+    <link rel="stylesheet" href="/assets/fontawesome/v5.15.4/css/all.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"/>
+</head>
+<body>
+<div class="container">
+    <header>
+        <div class="col-lg-6">
+            <h1>List of customer</h1>
+        </div>
+        <div class="col-lg-6 header-right-button">
+            <a href="#">
+                <button class="btn btn-outline-light">
+                    <i class="fas fa-history"></i>
+                    Transfer histories
+                </button>
+            </a>
+            <a href="/customers/create">
+                <button class="btn btn-outline-light">
+                    <i class="fas fa-user-plus"></i>
+                    Add new customer
+                </button>
+            </a>
+        </div>
+    </header>
+    <div class="content">
+        <table class="table table-hover">
+            <thead>
+            <tr>
+                <th>#</th>
+                <th>Full Name</th>
+                <th>Email</th>
+                <th>Phone</th>
+                <th>Address</th>
+                <th>Balance</th>
+                <th>Action</th>
+            </tr>
+            </thead>
+            <tbody>
+            <th:block th:each="item : ${customers}">
+                <tr>
+                    <td th:text="${item.id}" class="text-center"></td>
+                    <td th:text="${item.fullName}"></td>
+                    <td th:text="${item.email}" class="text-center"></td>
+                    <td th:text="${item.phone}" class="text-center"></td>
+                    <td th:text="${item.address}"></td>
+                    <td th:text="${item.balance}" class="text-end num-space"></td>
+                    <td class="text-center">
+                        <a class="btn btn-outline-secondary" th:href="@{/customers/edit/__${item.id}__ }">
+                            <i class="fa fa-pencil" aria-hidden="true"></i>
+                        </a>
+
+
+                        <a class="btn btn-outline-success" th:href="@{/customers/deposit/__${item.id}__ }">
+                            <i class="fa fa-plus" aria-hidden="true"></i>
+                        </a>
+
+
+                        <a class="btn btn-outline-warning" th:href="@{/customers/withdraw/__${item.id}__ }">
+                            <i class="fa fa-minus" aria-hidden="true"></i>
+                        </a>
+
+
+                        <a class="btn btn-outline-primary" th:href="@{/customers/transfer/__${item.id}__ }">
+                            <i class="fa fa-exchange" aria-hidden="true"></i>
+                        </a>
+
+
+                        <a class="btn btn-outline-danger" onclick="return confirm('Bạn chắn chắn muôn xoá?')" th:href="@{/customers/delete/__${item.id}__ }">
+                            <i class="fa fa-ban" aria-hidden="true"></i>
+                        </a>
+                    </td>
+                </tr>
+            </th:block>
+            </tbody>
+        </table>
+    </div>
+</div>
+<footer>
+    <div class="my-alert" th:if="${success} or ${error}">
+        <h3 th:text="${message}" th:class="${success} ? 'alert alert-success mb-0' : 'alert alert-danger mb-0'"></h3>
+    </div>
+</footer>
+</body>
+</html>
