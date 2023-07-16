@@ -1,11 +1,15 @@
 package com.cg.model;
 
+import org.springframework.validation.Errors;
+import org.springframework.validation.Validator;
+import org.thymeleaf.util.StringUtils;
+
 import javax.persistence.*;
 import java.math.BigDecimal;
 
 @Entity
 @Table(name = "withdraws")
-public class Withdraw extends BaseEntity{
+public class Withdraw extends BaseEntity implements Validator {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -49,5 +53,21 @@ public class Withdraw extends BaseEntity{
 
     public void setTransactionAmount(BigDecimal transactionAmount) {
         this.transactionAmount = transactionAmount;
+    }
+
+    @Override
+    public boolean supports(Class<?> aClass) {
+        return Withdraw.class.isAssignableFrom(aClass);
+    }
+
+    @Override
+    public void validate(Object o, Errors errors) {
+        Withdraw withdraw = (Withdraw) o;
+        BigDecimal transactionAmount = withdraw.transactionAmount;
+        if (transactionAmount == null) {
+            errors.rejectValue("transactionAmount","transactionAmount.length");
+        }else if(transactionAmount.compareTo(BigDecimal.ZERO)<=0) {
+                errors.rejectValue("transactionAmount","transactionAmount.zero");
+        }
     }
 }

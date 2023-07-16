@@ -61,7 +61,7 @@
       </div>
       <div class="col-lg-3">
         <label class="fw-bold">Transfer amount</label>
-        <input type="number" name="transferAmount" class="form-control" th:field="*{transferAmount}" required>
+        <input type="text" name="transferAmount" class="form-control" th:field="*{transferAmount}" oninput="handleTotalAmountTransaction(this)">
       </div>
       <div class="col-lg-3">
         <label class="fw-bold">Fees (%)</label>
@@ -87,5 +87,31 @@
     <h3 th:text="${message}" th:class="${success} ? 'alert alert-success mb-0' : 'alert alert-danger mb-0'"></h3>
   </div>
 </footer>
+
+<th:block th:if="${hasError == true}">
+  <div class="alert-danger">
+
+    <ul>
+      <li class="label-error" th:each="err : ${#fields.errors('transfer.*')}" th:text="${err}"></li>
+    </ul>
+  </div>
+</th:block>
+
+
+<!--<th:block th:if="${success== true}">-->
+<!--  <footer class="container-fluid bg-success">-->
+<!--    <ul class="container">-->
+<!--      <li th:text="${message}"></li>-->
+<!--    </ul>-->
+<!--  </footer>-->
+<!--</th:block>-->
+<script>
+  function handleTotalAmountTransaction(element) {
+    let transferAmount = Number(element.value);
+    let fees = Number(document.getElementById("fees").value);
+    let feesAmount = fees * transferAmount * 0.01;
+    document.getElementById("transactionAmount").value = transferAmount + feesAmount;
+  }
+</script>
 </body>
 </html>

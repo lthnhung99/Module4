@@ -1,6 +1,8 @@
 package com.cg.model;
 
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.validation.Errors;
+import org.springframework.validation.Validator;
 
 import javax.persistence.*;
 import java.math.BigDecimal;
@@ -8,22 +10,22 @@ import java.math.BigDecimal;
 @Entity
 @Transactional
 
-public class Transfer extends BaseEntity{
+public class Transfer extends BaseEntity implements Validator {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
     @ManyToOne
-    @JoinColumn(name="sender_id", referencedColumnName = "id", nullable = false)
+    @JoinColumn(name = "sender_id", referencedColumnName = "id", nullable = false)
     private Customer sender;
     @ManyToOne
-    @JoinColumn(name="recipient_id", referencedColumnName = "id", nullable = false)
+    @JoinColumn(name = "recipient_id", referencedColumnName = "id", nullable = false)
     private Customer recipient;
-    @Column(name="transfer_amount", precision = 10, scale = 0, nullable = false)
+    @Column(name = "transfer_amount", precision = 10, scale = 0, nullable = false)
     private BigDecimal transferAmount;
     private Long fees = 10L;
-    @Column(name="fees_amount", precision = 10, scale = 0, nullable = false)
+    @Column(name = "fees_amount", precision = 10, scale = 0, nullable = false)
     private BigDecimal feesAmount;
-    @Column(name="transaction_amount", precision = 10, scale = 0, nullable = false)
+    @Column(name = "transaction_amount", precision = 10, scale = 0, nullable = false)
     private BigDecimal transactionAmount;
 
     public Transfer() {
@@ -94,4 +96,31 @@ public class Transfer extends BaseEntity{
     public void setTransactionAmount(BigDecimal transactionAmount) {
         this.transactionAmount = transactionAmount;
     }
+
+    @Override
+    public boolean supports(Class<?> aClass) {
+        return Transfer.class.isAssignableFrom(aClass);
+    }
+
+    @Override
+    public void validate(Object o, Errors errors) {
+        Transfer transfer = (Transfer) o;
+        BigDecimal transferAmount = transfer.transferAmount;
+        if (transferAmount == null) {
+            errors.rejectValue("transactionAmount", "transactionAmount.empty");
+        }
+        else {
+            BigDecimal minValue = BigDecimal.valueOf(100);
+            BigDecimal maxValue = BigDecimal.valueOf(1000000);
+            if (transferAmount.compareTo(minValue) < 0) {
+                errors.rejectValue("transferAmount", "transferAmount.min");
+            }
+            if (transferAmount.compareTo(maxValue) > 0) {
+                errors.rejectValue("transferAmount", "transferAmount.max");
+            }
+        }
+
+
+        }
+
 }

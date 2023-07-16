@@ -11,6 +11,8 @@ import com.cg.service.withdraw.IWithdrawService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
+import org.springframework.validation.BindingResult;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.ModelAndView;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
@@ -40,20 +42,36 @@ public class CustomerController {
     }
 
     @GetMapping("/create")
-    public String showCreatePage() {
+    public String showCreatePage(Model model) {
+        model.addAttribute("customer", new Customer());
+
 
         return "/customer/create";
     }
 
     @PostMapping("/create")
-    public String doCreate(@ModelAttribute Customer customer, Model model) {
+    public String doCreate(Model model, @ModelAttribute Customer customer, BindingResult bindingResult) {
+
+       customer.validate(customer, bindingResult);
+
+        if (bindingResult.hasFieldErrors()) {
+            model.addAttribute("hasError", true);
+            return "customer/create";
+        }
+
+        String email = customer.getEmail();
+
+        Boolean existsEmail = customerService.existsByEmail(email);
+
+        if (existsEmail) {
+            model.addAttribute("notValid", true);
+            model.addAttribute("message", "Email đã tồn tại");
+            return "customer/create";
+        }
 
         customer.setId(null);
         customer.setBalance(BigDecimal.ZERO);
         customerService.save(customer);
-
-        model.addAttribute("success", true);
-        model.addAttribute("message", "Thêm thành công");
 
         return "/customer/create";
     }
@@ -74,20 +92,34 @@ public class CustomerController {
 
 
     @PostMapping("/edit/{id}")
-    public String doEdit(@PathVariable Long id, @ModelAttribute Customer customer, Model model) {
+    public String doEdit(@PathVariable Long id, @Validated @ModelAttribute Customer customer, Model model, BindingResult bindingResult) {
+        customer.validate(customer, bindingResult);
+        if (bindingResult.hasFieldErrors()) {
+            model.addAttribute("hasError", true);
+            return "customer/create";
+        }
+        String email = customer.getEmail();
+
+        Boolean existsEmail = customerService.existsByEmail(email);
+
+        if (existsEmail) {
+            model.addAttribute("notValid", true);
+            model.addAttribute("message", "Email đã tồn tại");
+            return "customer/edit";
+        }
 
         Optional<Customer> customerOptional = customerService.findById(id);
 
         if (customerOptional.isEmpty()) {
             model.addAttribute("error", true);
         } else {
-            Customer customer1=customerOptional.get();
+            Customer customer1 = customerOptional.get();
             customer.setId(id);
             customer.setBalance(customer1.getBalance());
             //customer.setBalance(BigDecimal.ZERO);
             customerService.save(customer);
             model.addAttribute("customer", customer);
-            model.addAttribute("success",true);
+            model.addAttribute("success", true);
             model.addAttribute("message", "Cập nhật thành công");
         }
         return "customer/edit";
@@ -115,6 +147,7 @@ public class CustomerController {
 
     @GetMapping("/deposit/{customerId}")
     public String showDepositForm(@PathVariable Long customerId, Model model) {
+
         Optional<Customer> customerOptional = customerService.findById(customerId);
 
         if (customerOptional.isEmpty()) {
@@ -134,9 +167,16 @@ public class CustomerController {
     }
 
     @PostMapping("/deposit/{customerId}")
-    public String doDeposit(@PathVariable Long customerId, Model model, @ModelAttribute Deposit deposit) {
-        Optional<Customer> customerOptional = customerService.findById(customerId);
+    public String doDeposit(@PathVariable Long customerId, Model model, @Validated @ModelAttribute Deposit deposit, BindingResult bindingResult) {
+        deposit.validate(deposit, bindingResult);
 
+        if (bindingResult.hasFieldErrors()) {
+            model.addAttribute("hasError", true);
+            return "customer/deposit";
+        }
+
+
+        Optional<Customer> customerOptional = customerService.findById(customerId);
         if (customerOptional.isEmpty()) {
             model.addAttribute("error", true);
             model.addAttribute("message", "ID không tồn tại");
@@ -162,24 +202,33 @@ public class CustomerController {
 
     @GetMapping("/withdraw/{customerId}")
     public String showWithdrawForm(@PathVariable Long customerId, Model model) {
-        Optional<Customer> customerOptional = customerService.findById(customerId);
+        try {
+            Optional<Customer> customerOptional = customerService.findById(customerId);
 
-        if (customerOptional.isEmpty()) {
-            model.addAttribute("error", true);
-            model.addAttribute("message", "ID không tồn tại");
+            if (customerOptional.isEmpty()) {
+                model.addAttribute("error", true);
+                model.addAttribute("message", "ID không tồn tại");
 
-        } else {
-            Customer customer = customerOptional.get();
-            Withdraw withdraw = new Withdraw();
-            withdraw.setCustomer(customer);
-            model.addAttribute("withdraw", withdraw);
+            } else {
+                Customer customer = customerOptional.get();
+                Withdraw withdraw = new Withdraw();
+                withdraw.setCustomer(customer);
+                model.addAttribute("withdraw", withdraw);
+            }
+        } catch (Exception e) {
+            return "/error/500";
         }
 
         return "/customer/withdraw";
     }
 
     @PostMapping("/withdraw/{customerId}")
-    public String doWithdraw(@PathVariable Long customerId, Model model, @ModelAttribute Withdraw withdraw) {
+    public String doWithdraw(@PathVariable Long customerId, @ModelAttribute Withdraw withdraw, Model model, BindingResult bindingResult) {
+        withdraw.validate(withdraw, bindingResult);
+        if (bindingResult.hasFieldErrors()) {
+            model.addAttribute("hasError", true);
+            return "customer/withdraw";
+        }
         Optional<Customer> customerOptional = customerService.findById(customerId);
 
         if (customerOptional.isEmpty()) {
@@ -212,11 +261,11 @@ public class CustomerController {
     }
 
     @GetMapping("/transfer/{senderId}")
-    public String showTransferForm(@PathVariable Long senderId, Model model){
+    public String showTransferForm(@PathVariable Long senderId, Model model) {
 
         Optional<Customer> senderOptional = customerService.findById(senderId);
 
-        if (senderOptional.isEmpty()){
+        if (senderOptional.isEmpty()) {
             model.addAttribute("error", true);
             model.addAttribute("message", "ID không tồn tại");
             return "/customer/transfer";
@@ -236,14 +285,19 @@ public class CustomerController {
     }
 
     @PostMapping("/transfer/{senderId}")
-    public String doTransfer(@PathVariable Long senderId, Model model ,@ModelAttribute Transfer transfer){
+    public String doTransfer(Model model, @PathVariable Long senderId, @RequestParam("recipient.id") Long recipientId, @ModelAttribute Transfer transfer, BindingResult bindingResult) {
+        transfer.validate(transfer, bindingResult);
+        if (bindingResult.hasFieldErrors()) {
+            model.addAttribute("hasError", true);
+            return "customer/transfer";
+        }
 
         Optional<Customer> senderOptional = customerService.findById(senderId);
         List<Customer> recipients = customerService.findAll();
         model.addAttribute("recipients", recipients);
         model.addAttribute("transfer", transfer);
 
-        if (senderOptional.isEmpty()){
+        if (senderOptional.isEmpty()) {
             model.addAttribute("error", true);
             model.addAttribute("message", "Không tìm thấy sender");
             return "/customer/transfer";
@@ -270,10 +324,10 @@ public class CustomerController {
         BigDecimal transferAmount = transfer.getTransferAmount();
         Long fees = transfer.getFees();
         BigDecimal feesAmount = transferAmount.multiply(BigDecimal.valueOf(fees)).divide(BigDecimal.valueOf(100));
-        BigDecimal transactionAmount = transferAmount.add(feesAmount) ;
+        BigDecimal transactionAmount = transferAmount.add(feesAmount);
 
         if (currentBalance.compareTo(transactionAmount) < 0) {
-            //model.addAttribute("currentRecipient", recipientId);
+            model.addAttribute("currentRecipient", recipientId);
             model.addAttribute("error", true);
             model.addAttribute("message", "Số dư không đủ");
             return "/customer/transfer";
@@ -297,11 +351,20 @@ public class CustomerController {
         transferService.save(transfer);
         model.addAttribute("transfer", transfer);
 
-        //model.addAttribute("currentRecipient", recipientId);
+        model.addAttribute("currentRecipient", recipientId);
         model.addAttribute("success", true);
         model.addAttribute("message", "Chuyển thành công");
 
         return "/customer/transfer";
+    }
+
+    @GetMapping("/history")
+    public String showHistoryTransferPage(Model model) {
+        List<Transfer> transfers = transferService.findAll();
+
+        model.addAttribute("transfers", transfers);
+
+        return "customer/history";
     }
 
 }

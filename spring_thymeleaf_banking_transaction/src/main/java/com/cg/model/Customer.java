@@ -1,21 +1,33 @@
 package com.cg.model;
 
+import org.springframework.validation.Errors;
+import org.springframework.validation.Validator;
+import org.springframework.validation.annotation.Validated;
+
 import javax.persistence.*;
+import javax.validation.constraints.NotBlank;
+import javax.validation.constraints.Pattern;
 import java.math.BigDecimal;
 
 @Entity
 @Table(name = "customers")
-public class Customer extends BaseEntity{
+public class Customer extends BaseEntity implements Validator {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
+    //    @NotBlank(message = "Họ tên là bắt buộc")
+//    @Pattern(regexp = "^(?!\\d)[a-zA-Z\\s]{5,20}$",message = "Tên không được chứa ký tự số, nằm trong khoảng 5-20 ký tự")
     @Column(name = "full_name", nullable = false)
     private String fullName;
+//    @NotBlank(message = "Email là bắt buộc")
+//    @Pattern(regexp = "^[a-zA-Z0-9_.+-]+@[a-zA-Z0-9-]+\\.[a-zA-Z0-9-.]+$",message = "Email không hợp lệ")
+
     @Column(nullable = false, unique = true)
     private String email;
+    //    @Pattern(regexp ="((84|0)[3|5|7|8|9])+([0-9]{8})\\b", message = "Số điện thoại không hợp lệ")
     private String phone;
     private String address;
-    @Column(precision = 10,scale = 0,nullable = false)
+    @Column(precision = 10, scale = 0, nullable = false)
     private BigDecimal balance;
 
     public Customer() {
@@ -76,5 +88,46 @@ public class Customer extends BaseEntity{
 
     public void setBalance(BigDecimal balance) {
         this.balance = balance;
+    }
+
+    @Override
+    public boolean supports(Class<?> clazz) {
+        return Customer.class.isAssignableFrom(clazz);
+    }
+
+    @Override
+    public void validate(Object target, Errors errors) {
+
+        Customer customer = (Customer) target;
+
+        String fullName = customer.fullName;
+        String email = customer.email;
+        String phone = customer.phone;
+        String regexName = "^(?!\\d)[a-zA-Z\\s]{5,20}$";
+        String regexEmail = "^[a-zA-Z0-9_.+-]+@[a-zA-Z0-9-]+\\.[a-zA-Z0-9-.]+$";
+//        String regexPhone = "((84|0)[3|5|7|8|9])+([0-9]{8})\\b";
+
+
+        if (fullName.length() == 0) {
+            errors.rejectValue("fullName", "fullName.empty");
+        } else {
+            if (!fullName.matches(regexName)) {
+                errors.rejectValue("fullName", "fullName.regex");
+            }
+
+        }
+        if (email.length() == 0) {
+            errors.rejectValue("email", "email.empty");
+        } else {
+
+            if (!email.matches(regexEmail)) {
+                errors.rejectValue("email", "email.regex");
+            }
+
+//        if (!phone.matches(regexPhone)) {
+//            errors.rejectValue("phone", "Số điện thoại không hợp lệ");
+//        }
+
+        }
     }
 }

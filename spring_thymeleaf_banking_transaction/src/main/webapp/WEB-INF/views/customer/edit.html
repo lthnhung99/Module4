@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en">
+<html xmlns:th="http://www.thymeleaf.org" lang="en">
 <head>
   <meta charset="UTF-8">
   <title>Edit customer</title>
@@ -33,21 +33,22 @@
       <div class="row mb-3">
         <div class="col-lg-6">
           <label class="form-label">Full name</label>
-          <input type="text" class="form-control" th:field="*{fullName}"/>
+          <input type="text" class="form-control" name="fullName" th:field="*{fullName}"/>
+
         </div>
         <div class="col-lg-6">
           <label class="form-label">Email</label>
-          <input type="email" class="form-control" th:field="*{email}"/>
+          <input type="text" class="form-control" name="email" th:field="*{email}"/>
         </div>
       </div>
       <div class="row mb-3">
         <div class="mb-3 col-lg-6">
           <label class="form-label">Phone</label>
-          <input type="tel" class="form-control" th:field="*{phone}"/>
+          <input type="tel" class="form-control" name="phone" th:field="*{phone}"/>
         </div>
         <div class="mb-3 col-lg-6">
           <label class="form-label">Address</label>
-          <input type="text" class="form-control" th:field="*{address}"/>
+          <input type="text" class="form-control" name="address" th:field="*{address}"/>
         </div>
       </div>
 
@@ -58,22 +59,28 @@
       </div>
     </form>
   </div>
-
+  <footer>
+<!--    <div class="my-alert" th:if="${success} or ${error}">-->
+<!--      <h3 th:text="${message}" th:class="${success} ? 'alert alert-success mb-0' : 'alert alert-danger mb-0'"></h3>-->
+<!--    </div>-->
+  </footer>
+  <footer class="alert alert-danger">
+    <div class="container">
+      <div class="error-area">
+        <th:block th:if="${hasError == true}">
+          <ul>
+            <li th:each="err : ${#fields.errors('customer.*')}" th:text="${err}"></li>
+          </ul>
+        </th:block>
+                    <th:block th:if="${notValid} == true">
+                        <ul>
+                            <li th:text="${message}"></li>
+                        </ul>
+                    </th:block>
+      </div>
+    </div>
+  </footer>
 </div>
 </body>
-<th:block th:if="${error == true}">
-  <footer class="container-fluid">
-    <ul class="container">
-      <li>Customer not found !</li>
-    </ul>
-  </footer>
-</th:block>
 
-<th:block th:if="${message}">
-  <footer class="my-alert alert alert-success mb-0" >
-    <ul class="container">
-      <li th:text="${message}"></li>
-    </ul>
-  </footer>
-</th:block>
 </html>

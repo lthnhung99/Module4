@@ -2,9 +2,61 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <title>$Title$</title>
+  <title>List of customer</title>
+  <link rel="stylesheet" href="/assets/bootstrap/v5.0/css/bootstrap.min.css">
+  <link rel="stylesheet" href="/assets/css/style.css">
+  <link rel="stylesheet" href="/assets/fontawesome/v5.15.4/css/all.min.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"/>
 </head>
 <body>
-$END$
+<div class="container">
+  <header>
+    <div class="col-lg-6">
+      <h1>List of customer</h1>
+    </div>
+    <div class="col-lg-6 header-right-button">
+      <a href="/customers/create">
+        <button class="btn btn-outline-light">
+          <i class="fas fa-user-plus"></i>
+          Add new customer
+        </button>
+      </a>
+    </div>
+  </header>
+  <div class="content">
+    <table class="table table-hover">
+      <thead>
+      <tr>
+        <th>ID</th>
+        <th>Sender ID</th>
+        <th>Sender Name</th>
+        <th>Recipient ID</th>
+        <th>Recipient Name</th>
+        <th>Fees</th>
+        <th>Fees Amount</th>
+        <th>Transfer Amount</th>
+        <th>Transaction Amount</th>
+        <th>Create at</th>
+      </tr>
+      </thead>
+      <tbody>
+      <tr th:each="item: ${transfers}">
+        <td th:text="${item.id}"></td>
+        <td th:text="${item.sender.id}"></td>
+        <td th:text="${item.sender.fullName}"></td>
+        <td th:text="${item.recipient.id}"></td>
+        <td th:text="${item.recipient.fullName}"></td>
+        <td th:text="${item.fees}"></td>
+        <td th:text="${item.feesAmount}"></td>
+        <td th:text="${item.transferAmount}"></td>
+        <td th:text="${item.transactionAmount}"></td>
+        <td th:text="${item.createdAt}"></td>
+
+      </tr>
+      </tbody>
+    </table>
+  </div>
+</div>
+
 </body>
 </html>
