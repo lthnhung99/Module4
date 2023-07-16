@@ -558,6 +558,7 @@
                 currentRow.replaceWith(str);
 
                 page.dialogs.elements.balanceDeposit.val(newBalance);
+                page.dialogs.elements.modalDeposit.modal('hide');
 
                 App.showSuccessAlert('Nạp tiền thành công');
             })
@@ -602,6 +603,7 @@
                 currentRow.replaceWith(str);
 
                 page.dialogs.elements.balanceWithdraw.val(newBalance);
+                page.dialogs.elements.modalWithdraw.modal('hide');
 
                 App.showSuccessAlert('Rút tiền thành công');
 
@@ -763,35 +765,56 @@
             page.dialogs.elements.transactionAmount.val(transactionAmount);
         })
 
-        page.dialogs.commands.closeModal = (formElem, errorArea) => {
-            formElem[0].reset();
-            formElem.validate().resetForm();
-            formElem.find("input.error").removeClass("error");
-            errorArea.empty().removeClass("show").addClass("hide");
+        page.dialogs.commands.closeModalCreate = () => {
+            page.dialogs.elements.formCreate[0].reset();
+            page.dialogs.elements.formCreate.validate().resetForm();
+            page.dialogs.elements.formCreate.find("input.error").removeClass("error");
+            page.dialogs.elements.errorAreaCreate.empty().removeClass("show").addClass("hide");
+        }
+        page.dialogs.commands.closeModalUpdate = () => {
+            page.dialogs.elements.formUpdate[0].reset();
+            page.dialogs.elements.formUpdate.validate().resetForm();
+            page.dialogs.elements.formUpdate.find("input.error").removeClass("error");
+            page.dialogs.elements.errorAreaUpdate.empty().removeClass("show").addClass("hide");
+        }
+        page.dialogs.commands.closeModalDeposit = () => {
+            page.dialogs.elements.formDeposit[0].reset();
+            page.dialogs.elements.formDeposit.validate().resetForm();
+            page.dialogs.elements.formDeposit.find("input.error").removeClass("error");
+            page.dialogs.elements.errorAreaDeposit.empty().removeClass("show").addClass("hide");
+        }
+        page.dialogs.commands.closeModalWithdraw = () => {
+            page.dialogs.elements.formWithdraw[0].reset();
+            page.dialogs.elements.formWithdraw.validate().resetForm();
+            page.dialogs.elements.formWithdraw.find("input.error").removeClass("error");
+            page.dialogs.elements.errorAreaWithdraw.empty().removeClass("show").addClass("hide");
+        }
+
+        page.dialogs.commands.closeModalTransfer = () => {
+            page.dialogs.elements.formTransfer[0].reset();
+            page.dialogs.elements.formTransfer.validate().resetForm();
+            page.dialogs.elements.formTransfer.find("input.error").removeClass("error");
+            page.dialogs.elements.errorAreaTransfer.empty().removeClass("show").addClass("hide");
         }
 
         /** Đóng modal: reset form */
         page.dialogs.elements.modalCreate.on("hidden.bs.modal", function () {
-            page.dialogs.commands.closeModal(page.dialogs.elements.formCreate, page.dialogs.elements.errorAreaCreate);
-        })
+            page.dialogs.commands.closeModalCreate();
+        });
         page.dialogs.elements.modalUpdate.on("hidden.bs.modal", function () {
-            page.dialogs.commands.closeModal(page.dialogs.elements.formUpdate, page.dialogs.elements.errorAreaUpdate);
-        })
+            page.dialogs.commands.closeModalUpdate();
+        });
         page.dialogs.elements.modalDeposit.on("hidden.bs.modal", function () {
-            page.dialogs.commands.closeModal(page.dialogs.elements.formDeposit, page.dialogs.elements.errorAreaDeposit);
-        })
+            page.dialogs.commands.closeModalDeposit();
+        });
         page.dialogs.elements.modalWithdraw.on("hidden.bs.modal", function () {
-            page.dialogs.commands.closeModal(page.dialogs.elements.formWithdraw, page.dialogs.elements.errorAreaWithdraw);
-        })
+            page.dialogs.commands.closeModalWithdraw();
+        });
         page.dialogs.elements.modalTransfer.on("hidden.bs.modal", function () {
-            page.dialogs.commands.closeModal(page.dialogs.elements.formTransfer, page.dialogs.elements.errorAreaTransfer);
-        })
+            page.dialogs.commands.closeModalTransfer();
+        });
 
     }
-
-
-
-
     page.loadData = () => {
         page.commands.getAllCustomers();
 
@@ -804,17 +827,12 @@
                 page.commands.getAllWards(districtId, page.dialogs.elements.wardCreate);
             });
         });
-
-
     }
-
-
     $(() => {
         page.loadData();
 
         page.initializeControlEvent();
     })
-
 </script>
 <script src="/assets/js/customer-validation.js"></script>
 </body>
