@@ -26,13 +26,6 @@ public class CustomerAPI {
     private ValidateUtils validateUtils;
     @GetMapping
     public ResponseEntity<?> getAllCustomers() {
-//        List<Customer> customers = customerService.findAllByDeletedIs(false);
-//        List<CustomerResDTO> customerResDTOS = new ArrayList<>();
-//
-//        for (Customer c : customers) {
-//            CustomerResDTO customerDTO = c.toCustomerResDTO();
-//            customerResDTOS.add(customerDTO);
-//        }
         List<CustomerResDTO> customerResDTOS = customerService.findAllCustomerResDTO();
         return ResponseEntity.ok(customerResDTOS);
     }
@@ -47,7 +40,6 @@ public class CustomerAPI {
         }
         String email = customerCreReqDTO.getEmail();
         if (customerService.existsByEmail(email)){
-//            throw new EmailExistsException("Email đã tồn tại");
             data.put("message", "Email đã tồn tại");
             return new ResponseEntity<>(data, HttpStatus.BAD_REQUEST);
         }
