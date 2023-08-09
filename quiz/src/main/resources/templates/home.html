@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/css/bootstrap.min.css">
+</head>
+<body>
+
+<div  class="container d-flex ">
+    <div id="quiz" class="container-fluid col-9">
+
+    </div>
+
+</div>
+    <div class="text-center">
+        <button onclick="submit()" type="submit" class="btn btn-primary">Submit</button>
+    </div>
+
+</body>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.7.0/jquery.min.js" ></script>
+<script>
+
+    let questions;
+    function renderQuiz(){
+        $.ajax({
+            url: 'http://localhost:8080/api/quiz',
+            type: "GET",
+            headers:{
+                'Accept':'application/json',
+                'Content-Type': 'application/json'},
+        }).done(data => {
+            let str = '';
+            data.forEach(quiz => {
+                questions = quiz.questions;
+                let ques = '';
+                quiz.questions.forEach((question,index) => {
+                    let ans = '';
+                    question.answers.forEach(answer => {
+                        if(question.type === "single"){
+                            ans += ` <div class="form-check">
+              <input class="form-check-input" value="${answer.title}" type="radio" name="ques-${question.id}" id="answer-${answer.id}">
+              <label class="form-check-label" for="flexRadioDefault1">
+                  ${answer.title}.${answer.content}
+              </label>
+          </div>`
+                        }
+                        else {
+                            ans += ` <div class="form-check">
+              <input class="form-check-input" value="${answer.title}" type="checkbox" name="ques-${question.id}" id="answer-${answer.id}">
+              <label class="form-check-label" for="flexRadioDefault1">
+                  ${answer.title}.${answer.content}
+              </label>
+          </div>`
+                        }
+                    })
+                    ques += ` <h4 class="alert alert-primary disabled">${index+1}.${question.content}</h4>
+            ${ans}
+          `
+                })
+                str += ` <h1 align="center">${quiz.content}</h1>
+  <div id="">
+      <div id="question">
+         ${ques}
+      </div>
+  </div>`
+            })
+            document.getElementById('quiz').innerHTML = str;
+        })
+
+    }
+    renderQuiz();
+
+</script>
+</html>
